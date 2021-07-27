@@ -7,6 +7,14 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
+const mongoose = require('mongoose');
+const UserParent = require('./models/User.js');
+const BookSchemaParent = require('./models/BookSchema.js');
+
+// these are default options, just use them do not read into them
+const mongooseOptions = { useNewUrlParser: true, useUnifiedTopology: true }
+
+mongoose.connect('mongodb://localhost:27017/db-name', mongooseOptions)
 
 const app = express();
 app.use(cors());
@@ -37,5 +45,22 @@ app.get('/test', (req, res) => {
     }
   });
 });
+
+
+//------------------------------------//
+// * Models
+//------------------------------------//
+let book1 = new BookSchemaParent({ name: 'Book1', description: 'book', status: 'status'})
+book1.save();
+let Gina = new UserParent({ email: 'ginamariehobbs@gmail.com', books: [ book1 ]})
+Gina.save();
+
+app.get('/books', (req, res) => {
+  // check the database then do a res.send of what's in there.
+  UserParent.find({})
+    .then(users => {
+      res.send(users)
+    })
+})
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
