@@ -17,6 +17,7 @@ const mongooseOptions = { useNewUrlParser: true, useUnifiedTopology: true }
 mongoose.connect('mongodb://localhost:27017/db-name', mongooseOptions)
 
 const app = express();
+app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 3001;
@@ -46,7 +47,6 @@ app.get('/test', (req, res) => {
   });
 });
 
-
 //------------------------------------//
 // * Models
 //------------------------------------//
@@ -54,6 +54,19 @@ let book1 = new BookSchemaParent({ name: 'Book1', description: 'book', status: '
 book1.save();
 let Gina = new UserParent({ email: 'ginamariehobbs@gmail.com', books: [ book1 ]})
 Gina.save();
+//-------------------------------------//
+
+app.post('/books', (req, res) => {
+  const {email, name, description, status} = req.body;
+  let user = UserParent.find({ email: email })
+  let book = new BookSchemaParent({ name: name, description: description, status: status });
+  book.save();
+  user.books.push(book);
+  user.save()
+    .then(user => {
+      res.json(user);
+    })
+})
 
 app.get('/books', (req, res) => {
   // check the database then do a res.send of what's in there.
