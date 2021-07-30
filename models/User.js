@@ -1,7 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const BookSchema = require('./BookSchema.js')
+const bookSchema = require('./BookSchema.js')
 
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true },

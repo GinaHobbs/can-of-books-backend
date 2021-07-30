@@ -58,19 +58,45 @@ Gina.save();
 
 app.post('/books', (req, res) => {
   const {email, name, description, status} = req.body;
-  let user = UserParent.find({ email: email })
   let book = new BookSchemaParent({ name: name, description: description, status: status });
-  book.save();
-  user.books.push(book);
-  user.save()
-    .then(user => {
-      res.json(user);
+  UserParent.findOne({ email }, (err, user) => {
+    user.books.push(book);
+    user.save()
+    .then(() => {
+      res.send(user.books);
     })
+  })
+  
+})
+
+app.delete('./books/:id', (req, res) => {
+  const id = Number(req.params.id)
+  const email = req.body.email
+  UserParent.findOne({ email }, (err, user) => {
+    const filtered = user.books.filter(book => book.id !== id);
+    user.books = filtered;
+    user.save();
+    res.send(filtered);
+  })
+})
+
+app.update('./books/:id', (req, res) => {
+  const id = Number(req.params.id)
+  const { name, description, status, email } = req.body;
+  UserParent.findOne({ email }, (err, user) => {
+    const bookArr = user.books.map((book, i) => {
+    return book._id === id ? book = { name, description, status, img } : book;
+    });
+    user.books = bookArr;
+    user.save();
+    res.send(bookArr);
+  })
 })
 
 app.get('/books', (req, res) => {
   // check the database then do a res.send of what's in there.
-  UserParent.find({})
+  let email = req.body.email;
+  UserParent.find({ email })
     .then(users => {
       res.send(users)
     })
