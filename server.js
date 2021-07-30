@@ -69,23 +69,25 @@ app.post('/books', (req, res) => {
   
 })
 
-app.delete('./books/:id', (req, res) => {
-  const id = Number(req.params.id)
+app.delete('/books/:id', (req, res) => {
+  const id = parseInt(req.params.id)
+  console.log(id)
   const email = req.body.email
   UserParent.findOne({ email }, (err, user) => {
-    const filtered = user.books.filter(book => book.id !== id);
+    const filtered = user.books.filter(book => parseInt(book._id) !== id);
     user.books = filtered;
+    console.log(filtered)
     user.save();
     res.send(filtered);
   })
 })
 
-app.update('./books/:id', (req, res) => {
-  const id = Number(req.params.id)
+app.put('./books/:id', (req, res) => {
+  const id = parseInt(req.params.id)
   const { name, description, status, email } = req.body;
   UserParent.findOne({ email }, (err, user) => {
     const bookArr = user.books.map((book, i) => {
-    return book._id === id ? book = { name, description, status, img } : book;
+    return parseInt(book._id) === id ? book = { name, description, status, img } : book;
     });
     user.books = bookArr;
     user.save();
@@ -95,11 +97,15 @@ app.update('./books/:id', (req, res) => {
 
 app.get('/books', (req, res) => {
   // check the database then do a res.send of what's in there.
-  let email = req.body.email;
-  UserParent.find({ email })
-    .then(users => {
-      res.send(users)
-    })
+  let email = req.query.email;
+  console.log(email)
+  UserParent.find({ email }), (err, user) => {
+    if (err) {
+      res.send('invalid user')
+    } else {
+      res.send(user.books);
+    }
+  }
 })
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
